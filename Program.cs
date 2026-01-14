@@ -15,7 +15,9 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
-app.UseAuthorization();
+app.UseAuthentication();//giris yapmýs mý bakar(eger unu Authorization altýna yazarsan haa yaparsýn cunku sýralama mantýðý vardýr burada)
+
+app.UseAuthorization();//role bakar admin user gibi
 
 app.MapStaticAssets();
 

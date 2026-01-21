@@ -1,0 +1,6 @@
+--tabloları silmek için
+DROP TABLE IF EXISTS Contacts;
+DROP TABLE IF EXISTS Testimonials;
+DROP TABLE IF EXISTS Projects;
+DROP TABLE IF EXISTS Skills;
+DROP TABLE IF EXISTS About;

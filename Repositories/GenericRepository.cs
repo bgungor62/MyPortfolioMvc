@@ -14,14 +14,28 @@ namespace MyPortfolio.Repositories
                 throw new InvalidOperationException("Connection string not found!");
             _tableName = typeof(T).Name + "s"; //project->projects
         }
-        public Task<int> AddAsync(T entity)
+        public async Task<int> AddAsync(T entity)
         {
-            throw new NotImplementedException();
+            using var connection = new NpgsqlConnection(_connectionString);
+            var properties = typeof(T).GetProperties()//hangi türden geldiğini bul
+                .Where(t => t.Name != "Id" && t.GetValue(entity) != null)
+                .ToList();
+            var propertyNames = properties.Select(p => p.Name).ToArray();
+            var parameterNames = propertyNames.Select(p => $"@{p}").ToArray();
+
+            var sql = $"INSERT INTO {_tableName} ({string.Join(", ", propertyNames)}) " +
+                $"VALUES ({string.Join(", ", parameterNames)}) " +
+                $"RETURNING Id";
+            var id = await connection.QuerySingleAsync<int>(sql, entity);
+            return id;
         }
 
-        public Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            using var connection = new NpgsqlConnection(_connectionString);
+            var sql = $"DELETE FROM {_tableName} WHERE Id=@Id";
+            var affectedRows = await connection.ExecuteAsync(sql, new { Id = id });
+            return affectedRows > 0;
         }
 
         public async Task<IEnumerable<T>> GetAllAsync()
@@ -40,9 +54,18 @@ namespace MyPortfolio.Repositories
             return result;
         }
 
-        public Task<bool> UpdateAsync(T entity)
+        public async Task<bool> UpdateAsync(T entity)
         {
-            throw new NotImplementedException();
+            using var connection = new NpgsqlConnection(_connectionString);
+            var properties = typeof(T).GetProperties()
+                .Where(p => p.Name != "Id" && p.Name != "CreatedAt" && p.GetValue(entity) != null).ToList();
+
+            var setClause = string.Join(", ", properties.Select(p => $"{p.Name}=@{p.Name}"));
+
+            var sql = $"UPDATE {_tableName} SET {setClause} WHERE Id = @Id";
+
+            var affectedRows = await connection.ExecuteAsync(sql, entity);
+            return affectedRows > 0;
         }
     }
 }

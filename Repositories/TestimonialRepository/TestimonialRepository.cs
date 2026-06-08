@@ -10,7 +10,8 @@ namespace MyPortfolio.Repositories.TestimonialRepository
         {
         }
 
-        public async Task<IEnumerable<Testimonial>> GetActiveTestimonial()
+
+        public async Task<IEnumerable<Testimonial>> GetActiveTestimonialAsync()
         {
             using var connection = new NpgsqlConnection(_connectionString);
             var sql = @"SELECT * FROM Testimonials WHERE IsActive=@IsActive";
